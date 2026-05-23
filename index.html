@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NOVOIR — Digital Luxury Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #080808;
+      --white: #f5f2ee;
+      --gold: #b8965a;
+      --font-serif: 'Cormorant Garamond', serif;
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); }
+
+    /* ── CURSOR ── */
+    .cursor {
+      width: 7px; height: 7px;
+      background: var(--white);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      will-change: transform;
+    }
+    .cursor-follower {
+      width: 30px; height: 30px;
+      border: 1px solid rgba(245,242,238,0.35);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      will-change: transform;
+      transition: width 0.3s, height 0.3s, border-color 0.3s;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 30px 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.5s, padding 0.5s, border-color 0.5s;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(8,8,8,0.97);
+      backdrop-filter: blur(16px);
+      padding: 18px 52px;
+      border-bottom-color: rgba(245,242,238,0.05);
+    }
+    .nav-logo {
+      font-family: var(--font-sans);
+      font-size: 14px; font-weight: 400;
+      letter-spacing: 0.3em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-links {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 44px; list-style: none;
+    }
+    .nav-links a {
+      font-size: 10.5px; font-weight: 400;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(245,242,238,0.6); text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute;
+      bottom: -3px; left: 0; width: 0; height: 1px;
+      background: var(--gold); transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-right { display: flex; align-items: center; gap: 22px; }
+    .nav-location {
+      font-size: 9.5px; letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(245,242,238,0.38);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .nav-location::before {
+      content: ''; width: 5px; height: 5px;
+      background: var(--gold); border-radius: 50%;
+    }
+    .nav-hamburger {
+      display: flex; flex-direction: column;
+      gap: 5px; cursor: none; padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block; width: 20px; height: 1px;
+      background: var(--white);
+      transition: transform 0.35s, opacity 0.35s;
+    }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu {
+      position: fixed; inset: 0;
+      background: var(--black); z-index: 999;
+      display: flex; flex-direction: column;
+      justify-content: center; padding: 80px 52px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .mobile-menu.open { opacity: 1; pointer-events: all; }
+    .mobile-nav-link {
+      font-family: var(--font-serif);
+      font-size: 46px; font-weight: 300;
+      color: rgba(245,242,238,0.6); text-decoration: none;
+      letter-spacing: 0.02em; display: block;
+      margin-bottom: 22px; transition: color 0.3s;
+    }
+    .mobile-nav-link:hover { color: var(--white); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; height: 100vh; min-height: 720px;
+      overflow: hidden;
+      display: flex; align-items: flex-end;
+      padding: 0 52px 88px;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background-image: url('hero-bg.webp');
+      background-size: cover;
+      background-position: 65% center;
+      transform-origin: center;
+      transform: scale(1.04);
+      will-change: transform;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(8,8,8,0.94) 0%, rgba(8,8,8,0.6) 38%, rgba(8,8,8,0.08) 75%, rgba(8,8,8,0.18) 100%),
+        linear-gradient(0deg, rgba(8,8,8,0.72) 0%, rgba(8,8,8,0) 55%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: 540px;
+    }
+    .hero-label {
+      font-size: 9.5px; letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: rgba(245,242,238,0.4);
+      margin-bottom: 18px; display: block;
+    }
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(46px, 5.8vw, 78px);
+      font-weight: 300; line-height: 1.04;
+      letter-spacing: -0.005em;
+      margin-bottom: 22px;
+    }
+    .hero-title em { font-style: italic; font-weight: 300; }
+    .hero-subtitle {
+      font-size: 11.5px; line-height: 1.9;
+      color: rgba(245,242,238,0.5);
+      max-width: 280px; margin-bottom: 44px;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 14px;
+      font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+      color: var(--white); text-decoration: none;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(245,242,238,0.22);
+      transition: border-color 0.3s, gap 0.3s;
+    }
+    .hero-cta:hover { border-color: var(--gold); gap: 22px; }
+    .hero-scroll {
+      position: absolute; right: -52px; top: 50%;
+      transform: translateY(-50%) rotate(90deg);
+      font-size: 8.5px; letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(245,242,238,0.2); z-index: 2; white-space: nowrap;
+    }
+    .hero-play {
+      position: absolute; bottom: 88px; right: 52px;
+      z-index: 2; display: flex; align-items: center; gap: 13px;
+      cursor: none;
+    }
+    .hero-play-btn {
+      width: 48px; height: 48px;
+      border: 1px solid rgba(245,242,238,0.22);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .hero-play-btn:hover { border-color: var(--gold); transform: scale(1.07); }
+    .hero-play-btn svg { width: 12px; fill: var(--white); margin-left: 2px; }
+    .hero-play-label {
+      font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(245,242,238,0.4); text-align: right; line-height: 1.75;
+    }
+
+    /* ── PHILOSOPHY ── */
+    .philosophy {
+      padding: 108px 52px 96px;
+      border-top: 1px solid rgba(245,242,238,0.05);
+    }
+    .philosophy-label {
+      font-size: 9.5px; letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(245,242,238,0.25); margin-bottom: 44px; display: block;
+    }
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr 1fr;
+      gap: 0 72px;
+      align-items: start;
+    }
+    .philosophy-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 2.8vw, 40px);
+      font-weight: 300; line-height: 1.22;
+    }
+    .philosophy-body p {
+      font-size: 11.5px; line-height: 2;
+      color: rgba(245,242,238,0.48);
+      margin-bottom: 30px;
+    }
+    .philosophy-link {
+      font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--white); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 11px;
+      border-bottom: 1px solid rgba(245,242,238,0.18);
+      padding-bottom: 5px; transition: border-color 0.3s, gap 0.3s;
+    }
+    .philosophy-link:hover { border-color: var(--gold); gap: 18px; }
+    .philosophy-stats-col { display: flex; flex-direction: column; gap: 0; }
+    .philosophy-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px 16px;
+    }
+    .stat-number {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 3.5vw, 48px);
+      font-weight: 300; line-height: 1;
+      margin-bottom: 7px;
+    }
+    .stat-label {
+      font-size: 8.5px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(245,242,238,0.3); line-height: 1.7;
+    }
+    .philosophy-location {
+      margin-top: 36px;
+      font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(245,242,238,0.2);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── SELECTED WORK ── */
+    .work {
+      padding: 72px 52px;
+      border-top: 1px solid rgba(245,242,238,0.05);
+    }
+    .work-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px;
+    }
+    .section-label {
+      font-size: 9.5px; letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(245,242,238,0.25);
+    }
+    .view-all {
+      font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(245,242,238,0.35); text-decoration: none;
+      display: flex; align-items: center; gap: 6px; transition: color 0.3s;
+    }
+    .view-all:hover { color: var(--white); }
+    .work-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+    .work-card {
+      position: relative; overflow: hidden;
+      aspect-ratio: 3 / 4.2; cursor: none;
+    }
+    .work-card-bg {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      transition: transform 0.85s cubic-bezier(0.22, 0.44, 0.44, 0.98);
+    }
+    .work-card:hover .work-card-bg { transform: scale(1.055); }
+    .work-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(8,8,8,0.52) 0%,
+        rgba(8,8,8,0) 30%,
+        rgba(8,8,8,0) 52%,
+        rgba(8,8,8,0.85) 100%
+      );
+    }
+    .work-card-top {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 20px 18px;
+    }
+    .work-card-title {
+      font-family: var(--font-sans);
+      font-size: 12px; font-weight: 400;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      display: block; margin-bottom: 3px;
+    }
+    .work-card-type {
+      font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(245,242,238,0.38); display: block;
+    }
+    .work-card-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .work-card-cta-text {
+      font-size: 8.5px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(245,242,238,0.42);
+    }
+    .work-card-arrow {
+      width: 25px; height: 25px;
+      border: 1px solid rgba(245,242,238,0.16);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: rgba(245,242,238,0.55);
+      transition: border-color 0.3s, background 0.3s, color 0.3s;
+    }
+    .work-card:hover .work-card-arrow {
+      border-color: var(--gold);
+      background: rgba(184,150,90,0.1);
+      color: var(--gold);
+    }
+
+    /* ── APPROACH ── */
+    .approach {
+      display: grid; grid-template-columns: 1fr 1fr;
+      min-height: 620px;
+      border-top: 1px solid rgba(245,242,238,0.05);
+    }
+    .approach-image {
+      position: relative; overflow: hidden;
+    }
+    .approach-image-bg {
+      position: absolute; inset: 0;
+      background-image: url('stone-bg.webp');
+      background-size: cover; background-position: center;
+    }
+    .approach-image-overlay {
+      position: absolute; inset: 0;
+      background: rgba(8,8,8,0.18);
+    }
+    .approach-content {
+      padding: 92px 68px 92px 72px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .approach-label {
+      font-size: 9.5px; letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(245,242,238,0.25); margin-bottom: 28px; display: block;
+    }
+    .approach-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 2.8vw, 40px);
+      font-weight: 300; line-height: 1.18;
+      margin-bottom: 58px;
+    }
+    .approach-steps {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; position: relative;
+    }
+    .approach-steps::before {
+      content: ''; position: absolute;
+      top: 13px; left: 0; right: 0; height: 1px;
+      background: rgba(245,242,238,0.05);
+    }
+    .approach-step { padding-right: 14px; }
+    .step-number {
+      font-size: 9.5px; letter-spacing: 0.1em;
+      color: rgba(245,242,238,0.2);
+      margin-bottom: 18px; display: block;
+    }
+    .step-title {
+      font-size: 8.5px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--white); font-weight: 500;
+      margin-bottom: 9px; display: block;
+    }
+    .step-desc {
+      font-size: 10.5px; line-height: 1.8;
+      color: rgba(245,242,238,0.35);
+    }
+
+    /* ── FOOTER CTA ── */
+    .footer-cta {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-top: 1px solid rgba(245,242,238,0.05);
+      min-height: 460px;
+    }
+    .footer-cta-left {
+      padding: 96px 64px 96px 52px;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; gap: 44px;
+    }
+    .footer-cta-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(36px, 4.2vw, 58px);
+      font-weight: 300; line-height: 1.1;
+    }
+    .footer-cta-actions {
+      display: flex; flex-direction: column;
+      gap: 18px; align-items: flex-start;
+    }
+    .footer-cta-btn {
+      display: inline-flex; align-items: center; gap: 11px;
+      font-size: 9.5px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--white); text-decoration: none;
+      padding: 13px 26px;
+      border: 1px solid rgba(245,242,238,0.16);
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .footer-cta-btn:hover {
+      border-color: var(--gold);
+      background: rgba(184,150,90,0.05);
+    }
+    .footer-contact-info { display: flex; flex-direction: column; gap: 5px; }
+    .footer-contact-info a {
+      font-size: 10.5px; color: rgba(245,242,238,0.3);
+      text-decoration: none; letter-spacing: 0.06em; transition: color 0.3s;
+    }
+    .footer-contact-info a:hover { color: var(--white); }
+    .footer-cta-image {
+      position: relative; overflow: hidden;
+    }
+    .footer-cta-image-bg {
+      position: absolute; inset: 0;
+      background-image: url('dubai-bg.webp');
+      background-size: cover; background-position: center bottom;
+    }
+    .footer-cta-image-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(8,8,8,0.65) 0%,
+        rgba(8,8,8,0.05) 60%,
+        rgba(8,8,8,0) 100%
+      );
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid rgba(245,242,238,0.05);
+    }
+    .footer-logo {
+      font-size: 13px; font-weight: 400;
+      letter-spacing: 0.3em; color: var(--white); text-decoration: none;
+    }
+    .footer-copy {
+      font-size: 9.5px; color: rgba(245,242,238,0.2); letter-spacing: 0.1em;
+    }
+    .footer-socials { display: flex; gap: 26px; }
+    .footer-socials a {
+      font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(245,242,238,0.28); text-decoration: none; transition: color 0.3s;
+    }
+    .footer-socials a:hover { color: var(--white); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(32px); }
+    .reveal.visible {
+      opacity: 1; transform: translateY(0);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .d1.visible { transition-delay: 0.08s; }
+    .d2.visible { transition-delay: 0.16s; }
+    .d3.visible { transition-delay: 0.24s; }
+    .d4.visible { transition-delay: 0.32s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .philosophy-grid { grid-template-columns: 1fr 1fr; gap: 48px; }
+      .philosophy-stats-col { grid-column: 1 / -1; }
+      .philosophy-stats { grid-template-columns: repeat(4,1fr); }
+      .work-grid { grid-template-columns: repeat(2,1fr); }
+      .approach { grid-template-columns: 1fr; }
+      .approach-image { min-height: 400px; }
+      .footer-cta { grid-template-columns: 1fr; }
+      .footer-cta-image { min-height: 340px; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: 22px 24px; }
+      nav.scrolled { padding: 14px 24px; }
+      .nav-links, .nav-location { display: none; }
+      .hero { padding: 0 24px 64px; }
+      .hero-scroll, .hero-play { display: none; }
+      .philosophy { padding: 72px 24px; }
+      .philosophy-grid { grid-template-columns: 1fr; gap: 36px; }
+      .philosophy-stats { grid-template-columns: 1fr 1fr; }
+      .work { padding: 72px 24px; }
+      .work-grid { grid-template-columns: 1fr 1fr; }
+      .approach-content { padding: 56px 24px; }
+      .approach-steps { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .footer-cta-left { padding: 72px 24px; }
+      footer { padding: 20px 24px; flex-wrap: wrap; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#work" class="mobile-nav-link" onclick="toggleMenu()">Work</a>
+    <a href="#services" class="mobile-nav-link" onclick="toggleMenu()">Services</a>
+    <a href="#philosophy" class="mobile-nav-link" onclick="toggleMenu()">Philosophy</a>
+    <a href="#about" class="mobile-nav-link" onclick="toggleMenu()">About</a>
+    <a href="#insights" class="mobile-nav-link" onclick="toggleMenu()">Insights</a>
+    <a href="#contact" class="mobile-nav-link" onclick="toggleMenu()">Contact</a>
+  </div>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">NOVOIR</a>
+    <ul class="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#philosophy">Philosophy</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#insights">Insights</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="nav-location">Dubai, UAE</span>
+      <div class="nav-hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="hero-label reveal">Digital Luxury Studio</span>
+      <h1 class="hero-title reveal d1">
+        Where Vision<br>
+        Becomes<br>
+        <em>Timeless Presence.</em>
+      </h1>
+      <p class="hero-subtitle reveal d2">
+        We design and engineer digital experiences that elevate brands, engage audiences, and drive measurable growth.
+      </p>
+      <a href="#work" class="hero-cta reveal d3">
+        Explore Our Work &nbsp;→
+      </a>
+    </div>
+    <span class="hero-scroll">Scroll to Explore</span>
+    <div class="hero-play">
+      <div class="hero-play-btn">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      </div>
+      <div class="hero-play-label">Play Intro<br>01:24</div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY -->
+  <section class="philosophy" id="philosophy">
+    <span class="philosophy-label reveal">Our Philosophy</span>
+    <div class="philosophy-grid">
+      <div class="philosophy-heading reveal">
+        Digital presence<br>
+        isn't built.<br>
+        It's engineered.
+      </div>
+      <div class="philosophy-body reveal d1">
+        <p>At NOVOIR, we believe digital is more than design — it's perception, emotion, and strategy working in perfect harmony. We craft every detail with intention to create impact that lasts.</p>
+        <a href="#" class="philosophy-link">Discover Our Philosophy &nbsp;→</a>
+      </div>
+      <div class="philosophy-stats-col reveal d2">
+        <div class="philosophy-stats">
+          <div class="stat-item">
+            <div class="stat-number" data-target="80" data-suffix="+">80+</div>
+            <div class="stat-label">Projects<br>Delivered</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" data-target="50" data-suffix="+">50+</div>
+            <div class="stat-label">Brands<br>Elevated</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" data-target="97" data-suffix="%">97%</div>
+            <div class="stat-label">Client<br>Retention</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" data-target="12" data-suffix="M+">12M+</div>
+            <div class="stat-label">Users<br>Impacted</div>
+          </div>
+        </div>
+        <div class="philosophy-location">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          Based in Dubai. Working Worldwide.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELECTED WORK -->
+  <section class="work" id="work">
+    <div class="work-header">
+      <span class="section-label">Selected Work</span>
+      <a href="#" class="view-all">View All Projects &nbsp;↗</a>
+    </div>
+    <div class="work-grid">
+
+      <div class="work-card reveal">
+        <div class="work-card-bg" style="background-image:url('work-car.webp')"></div>
+        <div class="work-card-overlay"></div>
+        <div class="work-card-top">
+          <span class="work-card-title">VELOCE</span>
+          <span class="work-card-type">Automotive Identity</span>
+        </div>
+        <div class="work-card-bottom">
+          <span class="work-card-cta-text">View Case</span>
+          <div class="work-card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="work-card reveal d1">
+        <div class="work-card-bg" style="background-image:url('work-fashion.webp')"></div>
+        <div class="work-card-overlay"></div>
+        <div class="work-card-top">
+          <span class="work-card-title">VELORA</span>
+          <span class="work-card-type">E-Commerce Platform</span>
+        </div>
+        <div class="work-card-bottom">
+          <span class="work-card-cta-text">View Case</span>
+          <div class="work-card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="work-card reveal d2">
+        <div class="work-card-bg" style="background-image:url('work-architecture.webp')"></div>
+        <div class="work-card-overlay"></div>
+        <div class="work-card-top">
+          <span class="work-card-title">THE PENTHOUSE</span>
+          <span class="work-card-type">Branding & Web Design</span>
+        </div>
+        <div class="work-card-bottom">
+          <span class="work-card-cta-text">View Case</span>
+          <div class="work-card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="work-card reveal d3">
+        <div class="work-card-bg" style="background-image:url('work-aircraft.webp')"></div>
+        <div class="work-card-overlay"></div>
+        <div class="work-card-top">
+          <span class="work-card-title">LUXÈ CLUB</span>
+          <span class="work-card-type">Membership Platform</span>
+        </div>
+        <div class="work-card-bottom">
+          <span class="work-card-cta-text">View Case</span>
+          <div class="work-card-arrow">→</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- APPROACH -->
+  <section class="approach" id="about">
+    <div class="approach-image">
+      <div class="approach-image-bg"></div>
+      <div class="approach-image-overlay"></div>
+    </div>
+    <div class="approach-content">
+      <span class="approach-label reveal">Our Approach</span>
+      <h2 class="approach-heading reveal d1">
+        A refined process.<br>
+        Exceptional results.
+      </h2>
+      <div class="approach-steps">
+        <div class="approach-step reveal">
+          <span class="step-number">01</span>
+          <span class="step-title">Discover</span>
+          <p class="step-desc">Understanding your vision and objectives.</p>
+        </div>
+        <div class="approach-step reveal d1">
+          <span class="step-number">02</span>
+          <span class="step-title">Strategize</span>
+          <p class="step-desc">Crafting the digital direction and roadmap.</p>
+        </div>
+        <div class="approach-step reveal d2">
+          <span class="step-number">03</span>
+          <span class="step-title">Design</span>
+          <p class="step-desc">Designing with elegance, intent, and precision.</p>
+        </div>
+        <div class="approach-step reveal d3">
+          <span class="step-number">04</span>
+          <span class="step-title">Develop</span>
+          <p class="step-desc">Building seamless, high-performance experiences.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER CTA -->
+  <section class="footer-cta" id="contact">
+    <div class="footer-cta-left">
+      <h2 class="footer-cta-heading reveal">
+        Let's create<br>
+        something iconic.
+      </h2>
+      <div class="footer-cta-actions reveal d1">
+        <a href="mailto:hello@novoir.co" class="footer-cta-btn">
+          Start a Project &nbsp;↗
+        </a>
+        <div class="footer-contact-info">
+          <a href="mailto:hello@novoir.co">hello@novoir.co</a>
+          <a href="tel:+971505935734">+971 50 593 5734</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-cta-image">
+      <div class="footer-cta-image-bg"></div>
+      <div class="footer-cta-image-overlay"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="footer-logo">NOVOIR</a>
+    <span class="footer-copy">© 2025 NOVOIR. All Rights Reserved.</span>
+    <div class="footer-socials">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">Behance</a>
+    </div>
+  </footer>
+
+  <script>
+    // ── CURSOR
+    const cursor = document.getElementById('cursor');
+    const follower = document.getElementById('cursorFollower');
+    let mx = 0, my = 0, fx = 0, fy = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.transform = `translate(${mx-3.5}px,${my-3.5}px)`;
+    });
+    (function tick() {
+      fx += (mx - fx) * 0.11;
+      fy += (my - fy) * 0.11;
+      follower.style.transform = `translate(${fx-15}px,${fy-15}px)`;
+      requestAnimationFrame(tick);
+    })();
+    document.querySelectorAll('a,.work-card,.nav-hamburger,.hero-play-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        follower.style.width = '50px';
+        follower.style.height = '50px';
+        follower.style.borderColor = 'rgba(184,150,90,0.5)';
+      });
+      el.addEventListener('mouseleave', () => {
+        follower.style.width = '30px';
+        follower.style.height = '30px';
+        follower.style.borderColor = 'rgba(245,242,238,0.35)';
+      });
+    });
+
+    // ── NAV SCROLL
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', scrollY > 50);
+    });
+
+    // ── HAMBURGER
+    let open = false;
+    function toggleMenu() {
+      open = !open;
+      document.getElementById('mobileMenu').classList.toggle('open', open);
+      const s = document.querySelectorAll('.nav-hamburger span');
+      s[0].style.transform = open ? 'rotate(45deg) translate(4px,4px)' : '';
+      s[1].style.transform = open ? 'rotate(-45deg) translate(4px,-4px)' : '';
+    }
+
+    // ── HERO PARALLAX
+    window.addEventListener('scroll', () => {
+      if (scrollY < innerHeight)
+        document.getElementById('heroBg').style.transform = `scale(1.04) translateY(${scrollY * 0.2}px)`;
+    });
+
+    // ── SCROLL REVEAL
+    const ro = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+    // ── HERO ON LOAD
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('visible'));
+      }, 120);
+    });
+
+    // ── STAT COUNTERS
+    function countUp(el) {
+      const target = +el.dataset.target;
+      const suffix = el.dataset.suffix;
+      let start; const dur = 1800;
+      const step = ts => {
+        if (!start) start = ts;
+        const p = Math.min((ts - start) / dur, 1);
+        el.textContent = Math.floor((1 - Math.pow(1-p, 3)) * target) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.stat-number').forEach(countUp);
+          e.currentTarget.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 }).observe(document.querySelector('.philosophy-stats'));
+  </script>
+</body>
+</html>
